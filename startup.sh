@@ -132,21 +132,49 @@ sudo apt update && sudo apt install vivaldi-stable
 echo 'Launching Vivaldi on Github so you can paste your keys'
 vivaldi https://github.com/settings/keys </dev/null >/dev/null 2>&1 & disown
 
-echo 'Installing Docker'
+echo 'Installing Docker & Docker desktop'
 sudo apt-get purge docker docker-engine docker.io
-sudo apt-get install docker.io -y
-sudo systemctl start docker
-sudo systemctl enable docker
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add the repository to Apt sources:
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+
+# sudo apt-get install docker.io -y
+# sudo systemctl start docker
+# sudo systemctl enable docker
+
+# echo 'Installing docker-compose'
+# sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+# sudo chmod +x /usr/local/bin/docker-compose
+# docker-compose --version
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+#Verify docker installation using the hello world container
+$ sudo docker run hello-world
 docker --version
 
-sudo groupadd docker
-sudo usermod -aG docker $USER
-sudo chmod 777 /var/run/docker.sock
+# sudo groupadd docker
+# sudo usermod -aG docker $USER
+# sudo chmod 777 /var/run/docker.sock
 
-echo 'Installing docker-compose'
-sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-docker-compose --version
+#Install AWS SAM
+##Download the aws-sam zip
+unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+sudo ./sam-installation/install
+sam --version
+
+# 
 
 echo 'Installing Heroku CLI'
 curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
@@ -234,4 +262,5 @@ read gpg_key_id
 git config --global user.signingkey $gpg_key_id
 gpg --armor --export $gpg_key_id
 
+echo ''
 echo 'All setup, enjoy!'
